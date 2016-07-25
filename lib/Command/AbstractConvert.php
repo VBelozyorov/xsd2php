@@ -24,7 +24,8 @@ abstract class AbstractConvert extends Console\Command\Command
             new InputOption('ns-map', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'How to map XML namespaces to PHP namespaces? Syntax: <info>XML-namespace;PHP-namespace</info>'),
             new InputOption('ns-dest', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Where place the generated files? Syntax: <info>PHP-namespace;destination-directory</info>'),
             new InputOption('alias-map', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'How to map XML namespaces into existing PHP classes? Syntax: <info>XML-namespace;XML-type;PHP-type</info>. '),
-            new InputOption('naming-strategy', null, InputOption::VALUE_REQUIRED, 'The naming strategy for classes. short|long', 'short')
+            new InputOption('naming-strategy', null, InputOption::VALUE_REQUIRED, 'The naming strategy for classes. short|long', 'short'),
+            new InputOption('with-jms', null, InputOption::VALUE_NONE, 'Add supported JMS annotation to classes and properties')
         ));
     }
 
@@ -63,6 +64,9 @@ abstract class AbstractConvert extends Console\Command\Command
         }
 
         $converter = $this->getConverterter($naming);
+        if (method_exists($converter, 'setWithJMS')) {
+            $converter->setWithJMS($input->getOption('with-jms'));
+        }
 
         $nsMapKeyed = array();
         $output->writeln("Namespaces:");
