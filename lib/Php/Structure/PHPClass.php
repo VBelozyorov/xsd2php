@@ -10,6 +10,8 @@ class PHPClass
 
     protected $doc;
 
+    protected $xmlns;
+
     public static function createFromFQCN($className)
     {
         if (($pos = strrpos($className, '\\')) !== false) {
@@ -66,6 +68,17 @@ class PHPClass
     public function getFullName()
     {
         return "{$this->namespace}\\{$this->name}";
+    }
+
+    public function getXmlNamespace()
+    {
+        return $this->xmlns;
+    }
+
+    public function setXmlNamespace($xmlns)
+    {
+        $this->xmlns = $xmlns;
+        return $this;
     }
 
     protected $checks = array();
