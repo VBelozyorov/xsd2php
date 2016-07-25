@@ -9,6 +9,8 @@ use Zend\Code\Generator;
 use Zend\Code\Generator\DocBlock\Tag\ParamTag;
 use Zend\Code\Generator\DocBlock\Tag\PropertyTag;
 use Zend\Code\Generator\DocBlock\Tag\ReturnTag;
+use Goetas\Xsd\XsdToPhp\Jms\Dockblock\XmlNamespaceTag;
+use Goetas\Xsd\XsdToPhp\Jms\Dockblock\XmlElementTag;
 use Zend\Code\Generator\DocBlockGenerator;
 use Zend\Code\Generator\MethodGenerator;
 use Zend\Code\Generator\ParameterGenerator;
@@ -19,7 +21,13 @@ class ClassGenerator
 
     private function handleBody(Generator\ClassGenerator $class, PHPClass $type)
     {
+        $xmlNamespace = $type->getXmlNamespace();
+
         foreach ($type->getProperties() as $prop) {
+            if ($xmlNamespace) {
+                $prop->setXmlNamespace($xmlNamespace);
+            }
+
             if ($prop->getName() !== '__value') {
                 $this->handleProperty($class, $prop);
             }
@@ -387,6 +395,9 @@ class ClassGenerator
             }
         }
         $docBlock->setTag($tag);
+        if ($prop->getXmlNamespace()) {
+            $docBlock->setTag(new XmlElementTag($prop->getXmlNamespace(), 'JMS'));
+        }
     }
 
     public function generate(Generator\ClassGenerator $class, PHPClass $type)
@@ -395,6 +406,11 @@ class ClassGenerator
         if ($type->getDoc()) {
             $docblock->setLongDescription($type->getDoc());
         }
+        if ($type->getXmlNamespace()) {
+            $class->addUse('JMS\Serializer\Annotation', 'JMS');
+            $docblock->setTag(new XmlNamespaceTag($type->getXmlNamespace(), sprintf('ns-%.5s', md5(uniqid())), 'JMS'));
+        }
+
         $class->setNamespaceName($type->getNamespace() ?: NULL);
         $class->setName($type->getName());
         $class->setDocblock($docblock);
