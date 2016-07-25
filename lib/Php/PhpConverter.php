@@ -24,6 +24,7 @@ use GoetasWebservices\XML\XSDReader\Schema\Type\Type;
 
 class PhpConverter extends AbstractConverter
 {
+    protected $withJMS = false;
 
     public function __construct(NamingStrategy $namingStrategy)
     {
@@ -47,6 +48,11 @@ class PhpConverter extends AbstractConverter
     }
 
     private $classes = [];
+
+    public function setWithJMS($value)
+    {
+        $this->withJMS = (bool) $value;
+    }
 
     public function convert(array $schemas)
     {
@@ -152,6 +158,9 @@ class PhpConverter extends AbstractConverter
             }
             $class->setNamespace($this->namespaces[$schema->getTargetNamespace()]);
 
+            if ($this->withJMS)
+                $class->setXmlNamespace($schema->getTargetNamespace());
+
             $this->classes[spl_object_hash($element)]["class"] = $class;
 
             if (!$element->getType()->getName()) {
@@ -217,6 +226,9 @@ class PhpConverter extends AbstractConverter
             $class->setNamespace($ns);
 
             $class->setDoc($type->getDoc() . PHP_EOL . "XSD Type: " . ($type->getName() ?: 'anonymous'));
+
+            if ($this->withJMS)
+                $class->setXmlNamespace($type->getSchema()->getTargetNamespace());
 
             $this->visitTypeBase($class, $type);
 
